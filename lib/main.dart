@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -48,7 +49,18 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'KanbanFlow Nhóm 4',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          useMaterial3: true,
+          textTheme: GoogleFonts.interTextTheme(Theme.of(context).textTheme),
+          scaffoldBackgroundColor: const Color(0xFFF4F7FC),
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.black87,
+            elevation: 0,
+            iconTheme: IconThemeData(color: Colors.black87),
+          ),
+        ),
         // 5. Màn hình chính hiển thị bảng Kanban
         home: const BoardScreen(),
       ),
