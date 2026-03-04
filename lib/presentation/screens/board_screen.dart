@@ -49,15 +49,21 @@ class _BoardScreenState extends State<BoardScreen> {
         title: isSearching
             ? TextField(
                 controller: searchController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'Tìm kiếm công việc...',
                   border: InputBorder.none,
-                  hintStyle: TextStyle(color: Colors.white70),
+                  hintStyle: TextStyle(color: Colors.grey[400]),
                 ),
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.black87, fontSize: 18),
                 autofocus: true,
               )
-            : const Text('KanbanFlow - Nhóm 4'),
+            : const Text(
+                'KanbanFlow',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                ),
+              ),
         centerTitle: !isSearching,
         actions: [
           IconButton(
@@ -86,34 +92,105 @@ class _BoardScreenState extends State<BoardScreen> {
               }
             },
           ),
+          const SizedBox(width: 8),
         ],
       ),
       drawer: _buildDrawer(context),
       body: selectedBoardId == null
-          ? const Center(
-              child: Text('Vui lòng chọn hoặc tạo Board từ Menu bên trái'),
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.dashboard_customize_outlined,
+                    size: 80,
+                    color: Colors.blue[300],
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Chào mừng đến với KanbanFlow',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Vui lòng chọn hoặc tạo Board từ Menu bên trái',
+                    style: TextStyle(fontSize: 16, color: Colors.black54),
+                  ),
+                  const SizedBox(height: 32),
+                  Builder(
+                    builder: (context) => ElevatedButton.icon(
+                      onPressed: () => Scaffold.of(context).openDrawer(),
+                      icon: const Icon(Icons.menu),
+                      label: const Text('Mở Menu'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             )
           : _buildBoardContent(context),
       floatingActionButton: selectedBoardId == null
           ? null
-          : FloatingActionButton(
+          : FloatingActionButton.extended(
               onPressed: () => _showAddTaskDialog(context),
-              child: const Icon(Icons.add),
+              icon: const Icon(Icons.add, color: Colors.white),
+              label: const Text(
+                'Thêm thẻ',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              backgroundColor: Colors.blueAccent,
+              elevation: 4,
             ),
     );
   }
 
   Widget _buildDrawer(BuildContext context) {
     return Drawer(
+      backgroundColor: Colors.white,
       child: Column(
         children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(color: Colors.blue),
-            child: Center(
-              child: Text(
-                'Danh sách Boards',
-                style: TextStyle(color: Colors.white, fontSize: 24),
+          Container(
+            padding: const EdgeInsets.only(
+              top: 60,
+              bottom: 30,
+              left: 24,
+              right: 24,
+            ),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.blueAccent, Colors.lightBlue],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.view_kanban, color: Colors.white, size: 36),
+                SizedBox(width: 16),
+                Text(
+                  'Các Bảng',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ),
           Expanded(
@@ -135,22 +212,53 @@ class _BoardScreenState extends State<BoardScreen> {
                 } else if (state is BoardLoaded) {
                   final boards = state.boards;
                   if (boards.isEmpty) {
-                    return const Center(child: Text('Chưa có Board nào.'));
+                    return const Center(
+                      child: Text(
+                        'Chưa có Bảng nào.',
+                        style: TextStyle(color: Colors.black54),
+                      ),
+                    );
                   }
-                  return ListView.builder(
+                  return ListView.separated(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
                     itemCount: boards.length,
+                    separatorBuilder: (_, __) =>
+                        const Divider(height: 1, indent: 24, endIndent: 24),
                     itemBuilder: (context, index) {
                       final board = boards[index];
+                      final isSelected = board.id == selectedBoardId;
                       return ListTile(
-                        leading: const Icon(Icons.dashboard),
-                        title: Text(board.title),
-                        selected: board.id == selectedBoardId,
+                        leading: Icon(
+                          isSelected
+                              ? Icons.dashboard
+                              : Icons.dashboard_outlined,
+                          color: isSelected
+                              ? Colors.blueAccent
+                              : Colors.black54,
+                        ),
+                        title: Text(
+                          board.title,
+                          style: TextStyle(
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: isSelected
+                                ? Colors.blueAccent
+                                : Colors.black87,
+                          ),
+                        ),
+                        selected: isSelected,
+                        selectedTileColor: Colors.blue.withOpacity(0.05),
                         onTap: () {
                           _selectBoard(board.id);
                           Navigator.pop(context); // Close drawer
                         },
                         trailing: IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            color: Colors.redAccent,
+                            size: 20,
+                          ),
                           onPressed: () =>
                               _showDeleteBoardDialog(context, board),
                         ),
@@ -164,13 +272,25 @@ class _BoardScreenState extends State<BoardScreen> {
               },
             ),
           ),
-          ListTile(
-            leading: const Icon(Icons.add),
-            title: const Text('Thêm Board mới'),
-            onTap: () {
-              Navigator.pop(context);
-              _showAddBoardDialog(context);
-            },
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton.icon(
+              onPressed: () {
+                Navigator.pop(context);
+                _showAddBoardDialog(context);
+              },
+              icon: const Icon(Icons.add),
+              label: const Text('Thêm Bảng Mới'),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size.fromHeight(50),
+                backgroundColor: Colors.blue.withOpacity(0.1),
+                foregroundColor: Colors.blueAccent,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -192,12 +312,36 @@ class _BoardScreenState extends State<BoardScreen> {
         if (state is TaskLoading) {
           return const Center(child: CircularProgressIndicator());
         } else if (state is TaskLoaded) {
-          return Row(
-            children: [
-              _buildColumn(context, 'To Do', 'todo', state.tasks),
-              _buildColumn(context, 'Doing', 'doing', state.tasks),
-              _buildColumn(context, 'Done', 'done', state.tasks),
-            ],
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildColumn(
+                  context,
+                  'Cần làm',
+                  'todo',
+                  state.tasks,
+                  Colors.blueAccent,
+                ),
+                const SizedBox(width: 16),
+                _buildColumn(
+                  context,
+                  'Đang làm',
+                  'doing',
+                  state.tasks,
+                  Colors.orangeAccent,
+                ),
+                const SizedBox(width: 16),
+                _buildColumn(
+                  context,
+                  'Hoàn thành',
+                  'done',
+                  state.tasks,
+                  Colors.green,
+                ),
+              ],
+            ),
           );
         } else if (state is TaskError) {
           return Center(child: Text('Lỗi: ${state.message}'));
@@ -212,6 +356,7 @@ class _BoardScreenState extends State<BoardScreen> {
     String title,
     String status,
     List<Task> allTasks,
+    Color accentColor,
   ) {
     final tasks = allTasks.where((t) => t.status == status).toList();
 
@@ -233,69 +378,102 @@ class _BoardScreenState extends State<BoardScreen> {
           context.read<TaskBloc>().add(UpdateTaskEvent(updatedTask));
         },
         builder: (context, candidateData, rejectedData) {
-          return Container(
-            margin: const EdgeInsets.all(4),
+          final isHovering = candidateData.isNotEmpty;
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
             decoration: BoxDecoration(
-              color: candidateData.isNotEmpty
-                  ? Colors.blue.withOpacity(0.2)
-                  : Colors.grey[200],
-              borderRadius: BorderRadius.circular(8),
-              border: candidateData.isNotEmpty
-                  ? Border.all(color: Colors.blue, width: 2)
-                  : null,
+              color: isHovering ? accentColor.withOpacity(0.1) : Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isHovering ? accentColor : Colors.grey.withOpacity(0.2),
+                width: isHovering ? 2 : 1,
+              ),
+              boxShadow: [
+                if (!isHovering)
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+              ],
             ),
             child: Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    '$title (${tasks.length})',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                  decoration: BoxDecoration(
+                    color: accentColor.withOpacity(0.1),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(15),
                     ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: accentColor,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const Spacer(),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: accentColor.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '${tasks.length}',
+                          style: TextStyle(
+                            color: accentColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 Expanded(
-                  child: ListView.builder(
+                  child: ListView.separated(
+                    padding: const EdgeInsets.all(12),
                     itemCount: tasks.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
                     itemBuilder: (context, index) {
                       final task = tasks[index];
                       return Draggable<Task>(
                         data: task,
                         feedback: Material(
-                          elevation: 4,
-                          borderRadius: BorderRadius.circular(8),
-                          child: Container(
-                            width: 250,
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  task.title,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  task.description,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
+                          elevation: 8,
+                          borderRadius: BorderRadius.circular(12),
+                          color: Colors.transparent,
+                          child: Opacity(
+                            opacity: 0.9,
+                            child: SizedBox(
+                              width: 300,
+                              child: _buildTaskCard(task),
                             ),
                           ),
                         ),
                         childWhenDragging: Opacity(
-                          opacity: 0.3,
+                          opacity: 0.4,
                           child: _buildTaskCard(task),
                         ),
                         child: _buildTaskCard(task),
@@ -312,19 +490,78 @@ class _BoardScreenState extends State<BoardScreen> {
   }
 
   Widget _buildTaskCard(Task task) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      elevation: 2,
-      child: ListTile(
-        title: Text(
-          task.title,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Text(task.description),
-        trailing: IconButton(
-          icon: const Icon(Icons.delete, color: Colors.red, size: 20),
-          onPressed: () =>
-              context.read<TaskBloc>().add(DeleteTaskEvent(task.id)),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              // TODO: Mở chi tiết công việc
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          task.title,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () => context.read<TaskBloc>().add(
+                          DeleteTaskEvent(task.id),
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        child: const Padding(
+                          padding: EdgeInsets.all(4.0),
+                          child: Icon(
+                            Icons.close,
+                            color: Colors.black26,
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (task.description.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      task.description,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.black54,
+                        fontSize: 13,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -335,16 +572,26 @@ class _BoardScreenState extends State<BoardScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Thêm Board mới'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Thêm Bảng mới',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         content: TextField(
           controller: titleController,
-          decoration: const InputDecoration(labelText: 'Tên Board'),
+          decoration: InputDecoration(
+            labelText: 'Tên Bảng',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            filled: true,
+            fillColor: Colors.grey[50],
+          ),
           autofocus: true,
         ),
+        actionsPadding: const EdgeInsets.all(16),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Hủy'),
+            child: const Text('Hủy', style: TextStyle(color: Colors.black54)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -357,6 +604,13 @@ class _BoardScreenState extends State<BoardScreen> {
               context.read<BoardBloc>().add(AddBoardEvent(board));
               Navigator.pop(context);
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blueAccent,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
             child: const Text('Thêm'),
           ),
         ],
@@ -368,17 +622,31 @@ class _BoardScreenState extends State<BoardScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Xác nhận xóa'),
-        content: Text(
-          'Bạn có chắc muốn xóa bảng "${board.title}"?\nTất cả công việc trong bảng này sẽ bị xóa.',
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Xác nhận xóa',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.redAccent,
+          ),
         ),
+        content: Text(
+          'Bạn có chắc chắn muốn xóa bảng "${board.title}"?\nTất cả công việc trong bảng sẽ bị xóa vĩnh viễn.',
+        ),
+        actionsPadding: const EdgeInsets.all(16),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Hủy'),
+            child: const Text('Hủy', style: TextStyle(color: Colors.black54)),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
             onPressed: () {
               context.read<BoardBloc>().add(DeleteBoardEvent(board.id));
               if (selectedBoardId == board.id) {
@@ -388,7 +656,7 @@ class _BoardScreenState extends State<BoardScreen> {
               }
               Navigator.pop(context);
             },
-            child: const Text('Xóa', style: TextStyle(color: Colors.white)),
+            child: const Text('Xóa Bảng'),
           ),
         ],
       ),
@@ -402,25 +670,46 @@ class _BoardScreenState extends State<BoardScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Thêm công việc mới'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Thêm công việc mới',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: titleController,
-              decoration: const InputDecoration(labelText: 'Tiêu đề'),
+              decoration: InputDecoration(
+                labelText: 'Tiêu đề',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                filled: true,
+                fillColor: Colors.grey[50],
+              ),
               autofocus: true,
             ),
+            const SizedBox(height: 12),
             TextField(
               controller: descController,
-              decoration: const InputDecoration(labelText: 'Mô tả'),
+              decoration: InputDecoration(
+                labelText: 'Mô tả (không bắt buộc)',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                filled: true,
+                fillColor: Colors.grey[50],
+              ),
+              maxLines: 3,
             ),
           ],
         ),
+        actionsPadding: const EdgeInsets.all(16),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Hủy'),
+            child: const Text('Hủy', style: TextStyle(color: Colors.black54)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -437,7 +726,14 @@ class _BoardScreenState extends State<BoardScreen> {
               context.read<TaskBloc>().add(AddTaskEvent(task));
               Navigator.pop(context);
             },
-            child: const Text('Thêm'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blueAccent,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Thêm công việc'),
           ),
         ],
       ),
