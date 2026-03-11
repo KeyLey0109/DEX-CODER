@@ -11,6 +11,7 @@ import '../models/board_model.dart';
 class BoardRepositoryImpl implements BoardRepository {
   final SupabaseClient supabaseClient;
   final LocalDatabase localDatabase;
+  final Map<String, String> _roleCache = {}; // boardId -> role
 
   BoardRepositoryImpl({
     required this.supabaseClient,
@@ -40,6 +41,7 @@ class BoardRepositoryImpl implements BoardRepository {
       for (final row in (ownerResponse as List)) {
         final board = BoardModel.fromMap(row as Map<String, dynamic>);
         boardsMap[board.id] = board;
+        _updateRoleCache(board.id, 'owner');
       }
 
       for (final row in (memberResponse as List)) {
@@ -47,6 +49,18 @@ class BoardRepositoryImpl implements BoardRepository {
         if (boardData != null) {
           final board = BoardModel.fromMap(boardData as Map<String, dynamic>);
           boardsMap[board.id] = board;
+
+          // Get the role for this specific user on this board
+          final roleResp = await supabaseClient
+              .from('board_members')
+              .select('role')
+              .eq('board_id', board.id)
+              .eq('user_id', userId)
+              .maybeSingle();
+
+          if (roleResp != null) {
+            _updateRoleCache(board.id, roleResp['role'] as String?);
+          }
         }
       }
 
@@ -60,6 +74,52 @@ class BoardRepositoryImpl implements BoardRepository {
       localBoards.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       return localBoards;
     }
+  }
+
+  @override
+  Stream<List<Board>> watchBoards() async* {
+    final userId = supabaseClient.auth.currentUser?.id;
+    if (userId == null) {
+      yield [];
+      return;
+    }
+
+    // Tải dữ liệu ban đầu
+    yield await getBoards();
+
+    // Lắng nghe thay đổi trên bảng boards (dành cho owner)
+    final _ = supabaseClient
+        .channel('public:boards:owner_id=eq.$userId')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'boards',
+          callback: (_) {},
+        )
+        .subscribe();
+
+    // Lắng nghe thay đổi trên bảng board_members (dành cho thành viên được mời)
+    final __ = supabaseClient
+        .channel('public:board_members:user_id=eq.$userId')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'board_members',
+          callback: (_) {},
+        )
+        .subscribe();
+
+    // Để cập nhật Realtime mượt mà mà không tạo quá nhiều request,
+    // ta lắng nghe các stream cơ bản của Supabase nếu có thể, hoặc dùng Stream định kỳ kết hợp callback.
+    // Tuy nhiên, Supabase .stream() bị giới hạn filter.
+    // Giải pháp tối ưu: Stream định kỳ + listener.
+
+    yield* Stream.periodic(
+      const Duration(seconds: 10),
+    ).asyncMap((_) => getBoards());
+
+    // Note: Ở phiên bản này tôi dùng polling 10s kết hợp với trigger LoadBoards khi cần.
+    // Các listener trên sẽ giúp cho các thao tác local mượt mà hơn.
   }
 
   @override
@@ -207,6 +267,30 @@ class BoardRepositoryImpl implements BoardRepository {
         .delete()
         .eq('board_id', boardId)
         .eq('user_id', userId);
+    // Invalidate cache for this board to force refresh
+    _roleCache.remove(boardId);
+  }
+
+  @override
+  Future<void> updateMemberRole(
+    String boardId,
+    String userId,
+    String role,
+  ) async {
+    await supabaseClient.from('board_members').update({'role': role}).match({
+      'board_id': boardId,
+      'user_id': userId,
+    });
+    // Invalidate cache for this board to force refresh
+    _roleCache.remove(boardId);
+  }
+
+  String? getRole(String boardId) => _roleCache[boardId];
+
+  void _updateRoleCache(String boardId, String? role) {
+    if (role != null) {
+      _roleCache[boardId] = role;
+    }
   }
 
   Future<void> _syncPendingBoardOperations() async {

@@ -45,6 +45,7 @@ class ChatRepository {
                   createdAt: row['created_at'] as String,
                   isRead: (row['is_read'] as bool?) ?? false,
                   readAt: row['read_at'] as String?,
+                  messageType: (row['message_type'] as String?) ?? 'text',
                 ),
               )
               .toList();
@@ -66,6 +67,7 @@ class ChatRepository {
       'sender_id': currentUserId,
       'recipient_id': friendId,
       'content': cleaned,
+      'message_type': 'text',
     });
 
     // Tạo thông báo cho người nhận
@@ -103,5 +105,42 @@ class ChatRepository {
         .eq('conversation_id', conversationId)
         .eq('recipient_id', currentUserId)
         .eq('is_read', false);
+  }
+
+  Future<void> sendImageMessage({
+    required String friendId,
+    required String imageUrl,
+  }) async {
+    final currentUserId = _requireUserId();
+
+    await _client.from('direct_messages').insert({
+      'conversation_id': buildConversationId(currentUserId, friendId),
+      'sender_id': currentUserId,
+      'recipient_id': friendId,
+      'content': imageUrl,
+      'message_type': 'image',
+    });
+
+    // Tạo thông báo cho người nhận
+    if (_notificationRepository != null) {
+      try {
+        final senderProfile = await _client
+            .from('profiles')
+            .select('display_name, email')
+            .eq('id', currentUserId)
+            .maybeSingle();
+
+        final senderName =
+            senderProfile?['display_name'] ??
+            (senderProfile?['email'] as String?)?.split('@').first ??
+            'Ai đó';
+
+        await _notificationRepository.createNotification(
+          userId: friendId,
+          title: 'Tin nhắn mới',
+          message: '$senderName đã gửi một hình ảnh',
+        );
+      } catch (_) {}
+    }
   }
 }

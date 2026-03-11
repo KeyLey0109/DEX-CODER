@@ -27,6 +27,7 @@ import 'presentation/screens/login_screen.dart';
 import 'presentation/screens/my_profile_screen.dart';
 import 'presentation/screens/reset_password_screen.dart';
 import 'presentation/screens/settings_screen.dart';
+import 'presentation/screens/web_task_view_screen.dart';
 import 'data/repositories/friend_repository.dart';
 
 Future<void> main() async {
@@ -182,10 +183,17 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         listener: (context, state) {
           if (state is Authenticated) {
             SupabaseNotificationListener.start(state.user.id);
+            // Nạp lại dữ liệu cho tài khoản mới
+            context.read<BoardBloc>().add(WatchBoards());
+            context.read<TaskBloc>().add(LoadTasks());
+
             // Dọn dẹp stack để không bị kẹt ở màn hình Login/Register
             _navigatorKey.currentState?.popUntil((route) => route.isFirst);
           } else if (state is Unauthenticated) {
             SupabaseNotificationListener.stop();
+            // Xóa sạch dữ liệu của tài khoản cũ
+            context.read<BoardBloc>().add(ResetBoards());
+            context.read<TaskBloc>().add(ResetTasks());
           }
         },
         child: ValueListenableBuilder<AppPreferencesState>(
@@ -210,17 +218,23 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             themeMode: prefs.themeMode,
             theme: _lightTheme,
             darkTheme: _darkTheme,
+            onGenerateRoute: (settings) {
+              if (settings.name != null && settings.name!.startsWith('/task/')) {
+                final taskId = settings.name!.replaceFirst('/task/', '');
+                return MaterialPageRoute(
+                  builder: (context) => WebTaskViewScreen(taskId: taskId),
+                );
+              }
+              return null;
+            },
             home: BlocBuilder<AuthBloc, AuthState>(
               builder: (context, state) {
-                if (state is AuthLoading) {
-                  return const Scaffold(
-                    body: Center(child: CircularProgressIndicator()),
-                  );
-                }
                 if (state is Authenticated) {
                   unawaited(_syncAppPreferences());
                   return const BoardScreen();
                 }
+                // Nếu đang loading (ví qua browser), ta vẫn giữ LoginScreen
+                // vì LoginScreen đã có cơ chế hiển thị loading/spinner riêng.
                 return const LoginScreen();
               },
             ),

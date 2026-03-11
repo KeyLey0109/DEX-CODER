@@ -57,9 +57,20 @@ class _FriendsScreenState extends State<FriendsScreen> {
         _loading = false;
       });
     } catch (e) {
-      _showSnack(
-        '${AppPreferences.tr('Không tải được dữ liệu bạn bè', 'Failed to load friends')}: $e',
-      );
+      String errorMessage = e.toString();
+      if (errorMessage.contains('SocketException') ||
+          errorMessage.contains('ClientException') ||
+          errorMessage.contains('Connection reset by peer')) {
+        errorMessage = AppPreferences.tr(
+          'Lỗi kết nối mạng. Vui lòng kiểm tra lại internet.',
+          'Network connection error. Please check your internet.',
+        );
+      } else {
+        errorMessage =
+            '${AppPreferences.tr('Không tải được dữ liệu bạn bè', 'Failed to load friends')}: $e';
+      }
+
+      _showSnack(errorMessage);
       if (mounted) setState(() => _loading = false);
     }
   }
