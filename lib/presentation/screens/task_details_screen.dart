@@ -838,7 +838,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
 
   void _showShareTaskDialog() {
     // URL for the deployed web app on Netlify
-    const baseUrl = "https://capable-gelato-8b83e8.netlify.app/task/";
+    const baseUrl = "https://precious-sopapillas-b5a339.netlify.app/task/";
     final taskUrl = "$baseUrl${_currentTask.id}";
 
     showDialog(

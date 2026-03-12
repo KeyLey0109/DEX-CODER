@@ -28,6 +28,7 @@ import 'presentation/screens/my_profile_screen.dart';
 import 'presentation/screens/reset_password_screen.dart';
 import 'presentation/screens/settings_screen.dart';
 import 'presentation/screens/web_task_view_screen.dart';
+import 'presentation/screens/my_tasks_screen.dart';
 import 'data/repositories/friend_repository.dart';
 
 Future<void> main() async {
@@ -207,6 +208,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               '/settings': (_) => const SettingsScreen(),
               '/profile': (_) => const MyProfileScreen(),
               '/friends': (_) => const FriendsScreen(),
+              '/my-tasks': (_) => const MyTasksScreen(),
             },
             locale: prefs.locale,
             supportedLocales: const [Locale('vi'), Locale('en')],

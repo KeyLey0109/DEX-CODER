@@ -1042,6 +1042,7 @@ class _BoardScreenState extends State<BoardScreen> {
           createdAt: droppedTask.createdAt,
           checklist: droppedTask.checklist,
           hasAttachments: droppedTask.hasAttachments,
+          taskType: droppedTask.taskType,
         );
         context.read<TaskBloc>().add(UpdateTaskEvent(updatedTask));
       },
@@ -1148,6 +1149,9 @@ class _BoardScreenState extends State<BoardScreen> {
           creatorId: droppedTask.creatorId,
           dueAt: droppedTask.dueAt,
           createdAt: droppedTask.createdAt,
+          checklist: droppedTask.checklist,
+          hasAttachments: droppedTask.hasAttachments,
+          taskType: droppedTask.taskType,
         );
         context.read<TaskBloc>().add(UpdateTaskEvent(updatedTask));
       },
@@ -1251,6 +1255,9 @@ class _BoardScreenState extends State<BoardScreen> {
           creatorId: droppedTask.creatorId,
           dueAt: droppedTask.dueAt,
           createdAt: droppedTask.createdAt,
+          checklist: droppedTask.checklist,
+          hasAttachments: droppedTask.hasAttachments,
+          taskType: droppedTask.taskType,
         );
         context.read<TaskBloc>().add(UpdateTaskEvent(updatedTask));
       },

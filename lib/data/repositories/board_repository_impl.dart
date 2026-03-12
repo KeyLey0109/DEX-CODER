@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../domain/entities/board.dart';
@@ -24,7 +25,7 @@ class BoardRepositoryImpl implements BoardRepository {
     if (userId == null) return [];
 
     try {
-      await _syncPendingBoardOperations();
+      await syncPendingBoards();
 
       final ownerResponse = await supabaseClient
           .from('boards')
@@ -124,6 +125,7 @@ class BoardRepositoryImpl implements BoardRepository {
 
   @override
   Future<void> addBoard(Board board) async {
+    debugPrint('DEBUG: BoardRepositoryImpl.addBoard - Starting for board: ${board.id}');
     final boardModel = BoardModel(
       id: board.id,
       title: board.title,
@@ -133,17 +135,22 @@ class BoardRepositoryImpl implements BoardRepository {
 
     await localDatabase.upsertBoard(boardModel);
     try {
+      debugPrint('DEBUG: BoardRepositoryImpl.addBoard - Upserting board to Supabase');
       await supabaseClient
           .from('boards')
           .upsert(boardModel.toMap(), onConflict: 'id');
       try {
+        debugPrint('DEBUG: BoardRepositoryImpl.addBoard - Inserting owner into board_members: ${board.ownerId}');
         await supabaseClient.from('board_members').insert({
           'board_id': board.id,
           'user_id': board.ownerId,
           'role': 'admin',
         });
-      } catch (_) {}
-    } catch (_) {
+      } catch (e) {
+        debugPrint('DEBUG: BoardRepositoryImpl.addBoard - Error inserting member (likely exists): $e');
+      }
+    } catch (e) {
+      debugPrint('DEBUG: BoardRepositoryImpl.addBoard - Supabase error, enqueuing sync: $e');
       await localDatabase.enqueueOperation(
         entity: 'board',
         operation: 'add',
@@ -293,20 +300,25 @@ class BoardRepositoryImpl implements BoardRepository {
     }
   }
 
-  Future<void> _syncPendingBoardOperations() async {
+  @override
+  Future<void> syncPendingBoards() async {
     final pending = await localDatabase.getPendingOperations('board');
     for (final op in pending) {
       try {
         final payload = jsonDecode(op.payload) as Map<String, dynamic>;
         if (op.operation == 'add') {
+          debugPrint('DEBUG: BoardRepositoryImpl._sync - Processing add for board: ${payload['id']}');
           await supabaseClient.from('boards').upsert(payload, onConflict: 'id');
           try {
+            debugPrint('DEBUG: BoardRepositoryImpl._sync - Inserting member: ${payload['owner_id']}');
             await supabaseClient.from('board_members').insert({
               'board_id': payload['id'],
               'user_id': payload['owner_id'],
               'role': 'admin',
             });
-          } catch (_) {}
+          } catch (e) {
+            debugPrint('DEBUG: BoardRepositoryImpl._sync - Member insert error: $e');
+          }
         } else if (op.operation == 'update') {
           await supabaseClient
               .from('boards')
@@ -317,7 +329,7 @@ class BoardRepositoryImpl implements BoardRepository {
         }
         await localDatabase.removePendingOperation(op.id);
       } catch (_) {
-        break;
+        continue;
       }
     }
   }

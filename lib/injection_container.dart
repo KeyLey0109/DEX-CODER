@@ -14,6 +14,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'data/repositories/task_interaction_repository.dart';
 import 'data/repositories/friend_repository.dart';
 import 'data/repositories/chat_repository.dart';
+import 'domain/repositories/task_aggregator_repository.dart';
+import 'data/repositories/task_aggregator_repository_impl.dart';
 
 import 'data/repositories/auth_repository_impl.dart';
 import 'domain/repositories/auth_repository.dart';
@@ -87,5 +89,8 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<ChatRepository>(
     () => ChatRepository(client: sl(), notificationRepository: sl()),
+  );
+  sl.registerLazySingleton<TaskAggregatorRepository>(
+    () => TaskAggregatorRepositoryImpl(supabaseClient: sl()),
   );
 }
