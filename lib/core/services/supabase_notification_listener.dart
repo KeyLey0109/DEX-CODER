@@ -27,9 +27,9 @@ class SupabaseNotificationListener {
                 data['message'] ?? 'Bạn có một thông báo mới từ TaskMate';
 
             NotificationService.showNotification(
-   
-  body: message,
-);
+              title: title,
+              body: message,
+            );
           },
         );
 
