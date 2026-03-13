@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Thêm để cấu hình thanh trạng thái
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase hide AuthState;
 
 import 'app_preferences.dart';
 import 'core/constants/supabase_constants.dart';
@@ -36,14 +36,14 @@ Future<void> main() async {
   // 1. Khởi tạo binding của Flutter đầu tiên
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 2. Cấu hình định hướng và giao diện hệ thống cho iOS/Android
+  // 2. Cấu hình định hướng dọc cho iOS/Android
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
 
   try {
-    // 3. Khởi tạo Supabase với Timeout để tránh treo màn hình trắng do mạng
-    await Supabase.initialize(
+    // 3. Khởi tạo Supabase với Timeout để tránh treo màn hình trắng
+    await supabase.Supabase.initialize(
       url: SupabaseConstants.supabaseUrl,
       anonKey: SupabaseConstants.supabaseAnonKey,
     ).timeout(const Duration(seconds: 10));
@@ -58,13 +58,11 @@ Future<void> main() async {
     }
 
     // 5. Khởi tạo Dependency Injection & Services
-    // Chúng ta dùng try-catch riêng để đảm bảo runApp luôn được gọi
     await di.init();
     await NotificationService.init();
 
   } catch (e) {
     debugPrint('Critical Initialization Error: $e');
-    // Bạn có thể hiện một thông báo lỗi ở đây nếu muốn
   }
 
   runApp(const MyApp());
@@ -82,7 +80,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   StreamSubscription? _authSubscription;
   bool _openingRecoveryScreen = false;
   
-  // Sử dụng delayed initialization cho các repository từ DI
   late final FriendRepository _friendRepository;
   final UserSettingsRepository _settingsRepository = UserSettingsRepository();
   
@@ -97,7 +94,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     // Khởi tạo repository từ service locator
     _friendRepository = di.sl<FriendRepository>();
 
-    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+    _authSubscription = supabase.Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       _handleAuthStateChange(data);
     });
 
@@ -105,10 +102,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     _startPresenceHeartbeat();
   }
 
-  void _handleAuthStateChange(dynamic data) async {
+  void _handleAuthStateChange(supabase.AuthState data) async {
     unawaited(_syncAppPreferences());
     
-    if (data.event == AuthChangeEvent.passwordRecovery && !_openingRecoveryScreen) {
+    if (data.event == supabase.AuthChangeEvent.passwordRecovery && !_openingRecoveryScreen) {
       _openingRecoveryScreen = true;
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         await _navigatorKey.currentState?.pushNamed('/reset-password');
@@ -152,7 +149,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   Future<void> _syncAppPreferences() async {
-    final user = Supabase.instance.client.auth.currentUser;
+    final user = supabase.Supabase.instance.client.auth.currentUser;
     if (user == null) {
       _preferencesLoadedForUserId = null;
       AppPreferences.apply(themeMode: 'system', languageCode: 'vi');
@@ -172,7 +169,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     }
   }
 
-  // --- THEME DATA ---
   static final _lightTheme = ThemeData(
     colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.light),
     useMaterial3: true,
@@ -212,8 +208,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             SupabaseNotificationListener.start(state.user.id);
             context.read<BoardBloc>().add(WatchBoards());
             context.read<TaskBloc>().add(LoadTasks());
-            
-            // Xóa toàn bộ stack cũ khi login thành công để tránh nút Back quay lại màn Login
             _navigatorKey.currentState?.pushNamedAndRemoveUntil('/', (route) => false);
           } else if (state is Unauthenticated) {
             SupabaseNotificationListener.stop();
@@ -223,49 +217,50 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         },
         child: ValueListenableBuilder<AppPreferencesState>(
           valueListenable: AppPreferences.notifier,
-          builder: (context, prefs, _) => MaterialApp(
-            navigatorKey: _navigatorKey,
-            title: 'TaskMate',
-            debugShowCheckedModeBanner: false,
-            routes: {
-              '/reset-password': (_) => const ResetPasswordScreen(),
-              '/settings': (_) => const SettingsScreen(),
-              '/profile': (_) => const MyProfileScreen(),
-              '/friends': (_) => const FriendsScreen(),
-              '/my-tasks': (_) => const MyTasksScreen(),
-            },
-            locale: prefs.locale,
-            supportedLocales: const [Locale('vi'), Locale('en')],
-            localizationsDelegates: const [
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            themeMode: prefs.themeMode,
-            theme: _lightTheme,
-            darkTheme: _darkTheme,
-            onGenerateRoute: (settings) {
-              if (settings.name != null && settings.name!.startsWith('/task/')) {
-                final taskId = settings.name!.replaceFirst('/task/', '');
-                return MaterialPageRoute(
-                  builder: (context) => WebTaskViewScreen(taskId: taskId),
-                );
-              }
-              return null;
-            },
-            home: BlocBuilder<AuthBloc, AuthState>(
-              builder: (context, state) {
-                if (state is Authenticated) {
-                  unawaited(_syncAppPreferences());
-                  return const BoardScreen();
-                } else if (state is AuthLoading) {
-                  return const Scaffold(
-                    body: Center(child: CircularProgressIndicator.adaptive()),
+          builder: (context, prefs, _) {
+            return MaterialApp(
+              navigatorKey: _navigatorKey,
+              title: 'TaskMate',
+              debugShowCheckedModeBanner: false,
+              locale: prefs.locale,
+              supportedLocales: const [Locale('vi'), Locale('en')],
+              localizationsDelegates: const [
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              themeMode: prefs.themeMode,
+              theme: _lightTheme,
+              darkTheme: _darkTheme,
+              routes: {
+                '/reset-password': (_) => const ResetPasswordScreen(),
+                '/settings': (_) => const SettingsScreen(),
+                '/profile': (_) => const MyProfileScreen(),
+                '/friends': (_) => const FriendsScreen(),
+                '/my-tasks': (_) => const MyTasksScreen(),
+              },
+              onGenerateRoute: (settings) {
+                if (settings.name?.startsWith('/task/') ?? false) {
+                  final taskId = settings.name!.replaceFirst('/task/', '');
+                  return MaterialPageRoute(
+                    builder: (context) => WebTaskViewScreen(taskId: taskId),
                   );
                 }
-                return const LoginScreen();
+                return null;
               },
-            ),
+              home: BlocBuilder<AuthBloc, AuthState>(
+                builder: (context, state) {
+                  if (state is Authenticated) {
+                    return const BoardScreen();
+                  } else if (state is AuthLoading) {
+                    return const Scaffold(
+                      body: Center(child: CircularProgressIndicator.adaptive()),
+                    );
+                  }
+                  return const LoginScreen();
+                },
+              ),
+            );
           },
         ),
       ),

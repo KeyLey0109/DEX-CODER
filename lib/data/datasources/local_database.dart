@@ -1,10 +1,7 @@
-<<<<<<< HEAD
 import 'dart:async';
 import 'dart:io';
-
-=======
 import 'dart:convert';
->>>>>>> 1a5fad6aeec40d8d32b9b5584a6d6fb1662a0e19
+
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
@@ -236,7 +233,7 @@ class LocalDatabase {
     return TaskModel.fromMap(result.first);
   }
 
-  // --- QUẢN LÝ PENDING OPERATIONS (Cho chế độ Offline) ---
+  // --- QUẢN LÝ PENDING OPERATIONS ---
 
   Future<int> enqueueOperation({
     required String entity,
@@ -272,9 +269,6 @@ class LocalDatabase {
     final db = await database;
     return db.delete('pending_ops', where: 'id = ?', whereArgs: [id]);
   }
-<<<<<<< HEAD
-}
-=======
 
   Future<void> clearPendingOperationsByEntityId(
     String entity,
@@ -291,4 +285,3 @@ class LocalDatabase {
     }
   }
 }
->>>>>>> 1a5fad6aeec40d8d32b9b5584a6d6fb1662a0e19
