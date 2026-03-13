@@ -53,7 +53,7 @@ class TaskChecklist extends StatelessWidget {
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
             value: progress,
-            backgroundColor: accentColor.withOpacity(0.1),
+            backgroundColor: accentColor.withValues(alpha: 0.1),
             valueColor: AlwaysStoppedAnimation<Color>(accentColor),
             minHeight: 6,
           ),
@@ -66,7 +66,7 @@ class TaskChecklist extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.03),
+                color: Colors.black.withValues(alpha: 0.03),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -116,7 +116,7 @@ class TaskChecklist extends StatelessWidget {
                         ),
                       if (onDeleteItem != null)
                         IconButton(
-                          icon: Icon(Icons.delete_outline, size: 18, color: Colors.red.withOpacity(0.7)),
+                          icon: Icon(Icons.delete_outline, size: 18, color: Colors.red.withValues(alpha: 0.7)),
                           onPressed: () => onDeleteItem!(item),
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),

@@ -359,6 +359,7 @@ class _BoardScreenState extends State<BoardScreen> {
                 tooltip: AppPreferences.tr('Thông báo', 'Notifications'),
                 onPressed: () async {
                   await _loadNotificationSetting();
+                  if (!context.mounted) return;
                   if (!_inAppNotificationsEnabled) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -606,7 +607,7 @@ class _BoardScreenState extends State<BoardScreen> {
                           // Kẻ dọc phân cách
                           Container(
                             width: 1,
-                            color: Colors.grey.withOpacity(0.2),
+                            color: Colors.grey.withValues(alpha: 0.2),
                           ),
                           // Khu vực chứa thẻ bên phải
                           Expanded(
@@ -825,50 +826,6 @@ class _BoardScreenState extends State<BoardScreen> {
     );
   }
 
-  void _showDeleteBoardDialog(BuildContext context, Board board) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
-          'Xác nhận xóa',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.redAccent,
-          ),
-        ),
-        content: Text(
-          'Bạn có chắc chắn muốn xóa bảng "${board.title}"?\nTất cả công việc trong bảng sẽ bị xóa vĩnh viễn.',
-        ),
-        actionsPadding: const EdgeInsets.all(16),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Hủy', style: TextStyle(color: Colors.black54)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            onPressed: () {
-              context.read<BoardBloc>().add(DeleteBoardEvent(board.id));
-              if (selectedBoardId == board.id) {
-                setState(() {
-                  selectedBoardId = null;
-                });
-              }
-              Navigator.pop(context);
-            },
-            child: const Text('Xóa Bảng'),
-          ),
-        ],
-      ),
-    );
-  }
 
   void _pickImage() async {
     final result = await FilePicker.platform.pickFiles(
@@ -921,14 +878,14 @@ class _BoardScreenState extends State<BoardScreen> {
     String? currentAttachmentName = initialAttachmentName;
     String currentTaskType = taskType;
     if (initialChecklist != null) currentTaskType = 'checklist';
-    bool _isUploading = false;
+    bool isUploading = false;
 
     // Determine form type and colors
     String dialogTitle = AppPreferences.tr('Thêm công việc', 'Add Task');
     IconData headerIcon = Icons.auto_awesome_rounded;
     Color themeColor = Colors.blueAccent;
 
-    void _updateDialogTheme(Uint8List? bytes, String? name) {
+    void updateDialogTheme(Uint8List? bytes, String? name) {
       if (bytes != null) {
         if (name?.endsWith('.png') == true &&
             name?.contains('drawing_') == true) {
@@ -962,7 +919,7 @@ class _BoardScreenState extends State<BoardScreen> {
       }
     }
 
-    _updateDialogTheme(currentAttachmentBytes, currentAttachmentName);
+    updateDialogTheme(currentAttachmentBytes, currentAttachmentName);
 
     showDialog(
       context: context,
@@ -984,7 +941,7 @@ class _BoardScreenState extends State<BoardScreen> {
                   borderRadius: BorderRadius.circular(32),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 40,
                       offset: const Offset(0, 20),
                     ),
@@ -997,7 +954,7 @@ class _BoardScreenState extends State<BoardScreen> {
                     Container(
                       padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
                       decoration: BoxDecoration(
-                        color: themeColor.withOpacity(0.05),
+                        color: themeColor.withValues(alpha: 0.05),
                         borderRadius: const BorderRadius.vertical(
                           top: Radius.circular(32),
                         ),
@@ -1007,7 +964,7 @@ class _BoardScreenState extends State<BoardScreen> {
                           Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: themeColor.withOpacity(0.15),
+                              color: themeColor.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Icon(
@@ -1062,7 +1019,7 @@ class _BoardScreenState extends State<BoardScreen> {
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                  color: themeColor.withOpacity(0.1),
+                                  color: themeColor.withValues(alpha: 0.1),
                                 ),
                                 color: const Color(0xFFF8FAFC),
                               ),
@@ -1096,7 +1053,7 @@ class _BoardScreenState extends State<BoardScreen> {
                                                 boxShadow: [
                                                   BoxShadow(
                                                     color: Colors.black
-                                                        .withOpacity(0.05),
+                                                        .withValues(alpha: 0.05),
                                                     blurRadius: 10,
                                                   ),
                                                 ],
@@ -1139,7 +1096,7 @@ class _BoardScreenState extends State<BoardScreen> {
                                                 setDialogState(() {
                                                   currentAttachmentBytes = null;
                                                   currentAttachmentName = null;
-                                                  _updateDialogTheme(
+                                                  updateDialogTheme(
                                                     null,
                                                     null,
                                                   );
@@ -1197,7 +1154,7 @@ class _BoardScreenState extends State<BoardScreen> {
                                                             BoxDecoration(
                                                               color: Colors
                                                                   .green
-                                                                  .withOpacity(
+                                                                  .withValues(alpha: 
                                                                     0.5,
                                                                   ),
                                                               shape: BoxShape
@@ -1251,7 +1208,7 @@ class _BoardScreenState extends State<BoardScreen> {
                               'Task Title',
                             ),
                             icon: Icons.edit_note_rounded,
-                            enabled: !_isUploading,
+                            enabled: !isUploading,
                             autofocus: true,
                           ),
                           const SizedBox(height: 16),
@@ -1293,7 +1250,7 @@ class _BoardScreenState extends State<BoardScreen> {
                                   setDialogState(() {
                                     currentAttachmentBytes = file.bytes;
                                     currentAttachmentName = file.name;
-                                    _updateDialogTheme(
+                                    updateDialogTheme(
                                       currentAttachmentBytes,
                                       currentAttachmentName,
                                     );
@@ -1335,7 +1292,7 @@ class _BoardScreenState extends State<BoardScreen> {
 
                           // Modern Date Picker
                           InkWell(
-                            onTap: _isUploading
+                            onTap: isUploading
                                 ? null
                                 : () async {
                                     final now = DateTime.now();
@@ -1389,7 +1346,7 @@ class _BoardScreenState extends State<BoardScreen> {
                                 border: Border.all(
                                   color: selectedDueAt == null
                                       ? Colors.transparent
-                                      : themeColor.withOpacity(0.35),
+                                      : themeColor.withValues(alpha: 0.35),
                                 ),
                               ),
                               child: Row(
@@ -1421,7 +1378,7 @@ class _BoardScreenState extends State<BoardScreen> {
                                       ),
                                     ),
                                   ),
-                                  if (selectedDueAt != null && !_isUploading)
+                                  if (selectedDueAt != null && !isUploading)
                                     IconButton(
                                       onPressed: () => setDialogState(
                                         () => selectedDueAt = null,
@@ -1440,7 +1397,7 @@ class _BoardScreenState extends State<BoardScreen> {
 
                           // Multi-Assignee Selection in Add Task Dialog
                           InkWell(
-                            onTap: _isUploading
+                            onTap: isUploading
                                 ? null
                                 : () async {
                                     final result =
@@ -1473,7 +1430,7 @@ class _BoardScreenState extends State<BoardScreen> {
                                 border: Border.all(
                                   color: selectedAssigneeIds.isEmpty
                                       ? Colors.transparent
-                                      : themeColor.withOpacity(0.35),
+                                      : themeColor.withValues(alpha: 0.35),
                                 ),
                               ),
                               child: Row(
@@ -1559,7 +1516,7 @@ class _BoardScreenState extends State<BoardScreen> {
                             children: [
                               Expanded(
                                 child: TextButton(
-                                  onPressed: _isUploading
+                                  onPressed: isUploading
                                       ? null
                                       : () => Navigator.pop(context),
                                   style: TextButton.styleFrom(
@@ -1584,7 +1541,7 @@ class _BoardScreenState extends State<BoardScreen> {
                               Expanded(
                                 flex: 2,
                                 child: ElevatedButton(
-                                  onPressed: _isUploading
+                                  onPressed: isUploading
                                       ? null
                                       : () async {
                                           if (titleController.text
@@ -1603,7 +1560,7 @@ class _BoardScreenState extends State<BoardScreen> {
                                           );
 
                                           setDialogState(
-                                            () => _isUploading = true,
+                                            () => isUploading = true,
                                           );
 
                                           final authState = authBloc.state;
@@ -1628,7 +1585,7 @@ class _BoardScreenState extends State<BoardScreen> {
                                               ),
                                             );
                                             setDialogState(
-                                              () => _isUploading = false,
+                                              () => isUploading = false,
                                             );
                                             return;
                                           }
@@ -1704,14 +1661,14 @@ class _BoardScreenState extends State<BoardScreen> {
                                                 ),
                                               );
                                               setDialogState(
-                                                () => _isUploading = false,
+                                                () => isUploading = false,
                                               );
                                             }
                                           }
                                         },
                                   style: ElevatedButton.styleFrom(
                                     elevation: 8,
-                                    shadowColor: themeColor.withOpacity(0.4),
+                                    shadowColor: themeColor.withValues(alpha: 0.4),
                                     padding: const EdgeInsets.symmetric(
                                       vertical: 16,
                                     ),
@@ -1721,7 +1678,7 @@ class _BoardScreenState extends State<BoardScreen> {
                                       borderRadius: BorderRadius.circular(16),
                                     ),
                                   ),
-                                  child: _isUploading
+                                  child: isUploading
                                       ? const SizedBox(
                                           width: 22,
                                           height: 22,

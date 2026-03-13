@@ -102,7 +102,7 @@ class _NotificationDialogState extends State<NotificationDialog>
             borderRadius: BorderRadius.circular(28),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 30,
                 offset: const Offset(0, 10),
               ),
@@ -119,7 +119,7 @@ class _NotificationDialogState extends State<NotificationDialog>
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: themeColor.withOpacity(0.1),
+                        color: themeColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Icon(
@@ -285,7 +285,7 @@ class _NotificationItem extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         decoration: BoxDecoration(
-          color: isUnread ? themeColor.withOpacity(0.03) : null,
+          color: isUnread ? themeColor.withValues(alpha: 0.03) : null,
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -355,7 +355,7 @@ class _NotificationItem extends StatelessWidget {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: themeColor.withOpacity(0.4),
+                        color: themeColor.withValues(alpha: 0.4),
                         blurRadius: 4,
                         spreadRadius: 1,
                       ),
@@ -395,7 +395,7 @@ class _NotificationItem extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: iconColor.withOpacity(0.12),
+        color: iconColor.withValues(alpha: 0.12),
         shape: BoxShape.circle,
       ),
       child: Icon(iconData, color: iconColor, size: 20),

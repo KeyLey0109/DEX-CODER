@@ -57,15 +57,15 @@ class BoardColumn extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isHovering
-                  ? accentColor.withOpacity(0.8)
-                  : Colors.grey.withOpacity(0.2),
+                  ? accentColor.withValues(alpha: 0.8)
+                  : Colors.grey.withValues(alpha: 0.2),
               width: isHovering ? 2 : 1,
             ),
             boxShadow: [
               BoxShadow(
                 color: isHovering
-                    ? accentColor.withOpacity(0.15)
-                    : Colors.black.withOpacity(0.04),
+                    ? accentColor.withValues(alpha: 0.15)
+                    : Colors.black.withValues(alpha: 0.04),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -110,7 +110,7 @@ class BoardColumn extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: accentColor.withOpacity(0.1),
+                  color: accentColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(

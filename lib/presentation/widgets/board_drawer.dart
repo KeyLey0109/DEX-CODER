@@ -53,7 +53,7 @@ class BoardDrawer extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.blueAccent.withOpacity(0.3),
+                        color: Colors.blueAccent.withValues(alpha: 0.3),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -156,7 +156,7 @@ class BoardDrawer extends StatelessWidget {
                           boxShadow: isSelected
                               ? [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.2),
+                                    color: Colors.black.withValues(alpha: 0.2),
                                     blurRadius: 8,
                                     offset: const Offset(0, 4),
                                   ),
@@ -193,7 +193,7 @@ class BoardDrawer extends StatelessWidget {
                                             BoxShadow(
                                               color: const Color(
                                                 0xFF3B82F6,
-                                              ).withOpacity(0.6),
+                                              ).withValues(alpha: 0.6),
                                               blurRadius: 6,
                                             ),
                                           ]
@@ -230,7 +230,7 @@ class BoardDrawer extends StatelessWidget {
                                     icon: Icon(
                                       Icons.delete_outline_rounded,
                                       color: isSelected
-                                          ? Colors.redAccent.withOpacity(0.8)
+                                          ? Colors.redAccent.withValues(alpha: 0.8)
                                           : const Color(
                                               0xFF475569,
                                             ), // Darker red/grey until hover
@@ -275,10 +275,10 @@ class BoardDrawer extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF3B82F6).withOpacity(0.1),
+                  color: const Color(0xFF3B82F6).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: const Color(0xFF3B82F6).withOpacity(0.5),
+                    color: const Color(0xFF3B82F6).withValues(alpha: 0.5),
                     width: 1.5,
                   ),
                 ),
@@ -323,10 +323,10 @@ class BoardDrawer extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 decoration: BoxDecoration(
-                  color: Colors.redAccent.withOpacity(0.1),
+                  color: Colors.redAccent.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: Colors.redAccent.withOpacity(0.3),
+                    color: Colors.redAccent.withValues(alpha: 0.3),
                     width: 1.5,
                   ),
                 ),

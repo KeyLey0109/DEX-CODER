@@ -266,7 +266,7 @@ class _BoardMemberDialogState extends State<BoardMemberDialog> {
                 padding: const EdgeInsets.all(8),
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
+                  color: Colors.red.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -294,7 +294,7 @@ class _BoardMemberDialogState extends State<BoardMemberDialog> {
                         return ListTile(
                           contentPadding: EdgeInsets.zero,
                           leading: CircleAvatar(
-                            backgroundColor: Colors.blueAccent.withOpacity(0.2),
+                            backgroundColor: Colors.blueAccent.withValues(alpha: 0.2),
                             child: Text(
                               member.displayName
                                       ?.substring(0, 1)
@@ -400,7 +400,7 @@ class _BoardMemberDialogState extends State<BoardMemberDialog> {
                       children: [
                         CircleAvatar(
                           radius: 20,
-                          backgroundColor: Colors.blueAccent.withOpacity(0.1),
+                          backgroundColor: Colors.blueAccent.withValues(alpha: 0.1),
                           backgroundImage: friend.avatarUrl != null
                               ? NetworkImage(friend.avatarUrl!)
                               : null,
@@ -464,16 +464,16 @@ class _BoardMemberDialogState extends State<BoardMemberDialog> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.5), width: 0.5),
+        border: Border.all(color: color.withValues(alpha: 0.5), width: 0.5),
       ),
       child: Text(
         label,
         style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.bold,
-          color: color.withOpacity(0.8),
+          color: color.withValues(alpha: 0.8),
         ),
       ),
     );

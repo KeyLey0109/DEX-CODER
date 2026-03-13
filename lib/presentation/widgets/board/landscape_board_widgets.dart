@@ -60,9 +60,9 @@ class BoardMenuItem extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
             decoration: BoxDecoration(
               color: isHovering
-                  ? accentColor.withOpacity(0.2)
+                  ? accentColor.withValues(alpha: 0.2)
                   : (isSelected
-                        ? accentColor.withOpacity(0.1)
+                        ? accentColor.withValues(alpha: 0.1)
                         : Colors.transparent),
               border: Border(
                 left: BorderSide(
@@ -104,7 +104,7 @@ class BoardMenuItem extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: accentColor.withOpacity(0.1),
+                    color: accentColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -170,7 +170,7 @@ class LandscapeTaskContent extends StatelessWidget {
         return AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           color: isHovering
-              ? accentColor.withOpacity(0.05)
+              ? accentColor.withValues(alpha: 0.05)
               : Colors.transparent,
           child: tasks.isEmpty
               ? Center(

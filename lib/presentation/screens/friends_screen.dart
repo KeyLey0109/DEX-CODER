@@ -196,7 +196,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: themeColor.withOpacity(0.08),
+            color: themeColor.withValues(alpha: 0.08),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -210,7 +210,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: themeColor.withOpacity(0.1),
+                  color: themeColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -340,10 +340,10 @@ class _FriendsScreenState extends State<FriendsScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.blueAccent.withOpacity(0.1)),
+                border: Border.all(color: Colors.blueAccent.withValues(alpha: 0.1)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.02),
+                    color: Colors.black.withValues(alpha: 0.02),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -411,7 +411,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Icon(icon, color: color, size: 20),
@@ -464,7 +464,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.02),
+                  color: Colors.black.withValues(alpha: 0.02),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -478,7 +478,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
                 height: 1,
                 indent: 80,
                 endIndent: 20,
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
               ),
               itemBuilder: (context, index) {
                 final friend = _friends[index];
@@ -559,18 +559,21 @@ class _FriendsScreenState extends State<FriendsScreen> {
     if (lastSeen == null) return AppPreferences.tr('Ngoại tuyến', 'Offline');
 
     final diff = DateTime.now().difference(lastSeen);
-    if (diff.inMinutes < 1)
+    if (diff.inMinutes < 1) {
       return AppPreferences.tr('Vừa hoạt động', 'Just active');
-    if (diff.inMinutes < 60)
+    }
+    if (diff.inMinutes < 60) {
       return AppPreferences.tr(
         'Hoạt động ${diff.inMinutes} phút trước',
         'Active ${diff.inMinutes} minutes ago',
       );
-    if (diff.inHours < 24)
+    }
+    if (diff.inHours < 24) {
       return AppPreferences.tr(
         'Hoạt động ${diff.inHours} giờ trước',
         'Active ${diff.inHours} hours ago',
       );
+    }
     return AppPreferences.tr(
       'Hoạt động ${diff.inDays} ngày trước',
       'Active ${diff.inDays} days ago',

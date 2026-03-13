@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/entities/assigned_task_view.dart';
 import '../../domain/repositories/task_aggregator_repository.dart';
@@ -124,7 +125,7 @@ class TaskAggregatorRepositoryImpl implements TaskAggregatorRepository {
       
       return result;
     } catch (e) {
-      print('DEBUG: Error fetching assigned tasks: $e');
+      debugPrint('DEBUG: Error fetching assigned tasks: $e');
       return [];
     }
   }

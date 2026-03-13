@@ -185,7 +185,7 @@ class _ChatScreenState extends State<ChatScreen> {
               children: [
                 CircleAvatar(
                   radius: 19,
-                  backgroundColor: Colors.blueAccent.withOpacity(0.1),
+                  backgroundColor: Colors.blueAccent.withValues(alpha: 0.1),
                   backgroundImage: widget.friend.avatarUrl != null
                       ? NetworkImage(widget.friend.avatarUrl!)
                       : null,
@@ -275,7 +275,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         children: [
                           CircleAvatar(
                             radius: 40,
-                            backgroundColor: Colors.blueAccent.withOpacity(0.1),
+                            backgroundColor: Colors.blueAccent.withValues(alpha: 0.1),
                             child: const Icon(
                               Icons.chat_bubble_outline_rounded,
                               size: 40,
@@ -457,7 +457,7 @@ class _ChatScreenState extends State<ChatScreen> {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
+                  color: Colors.black.withValues(alpha: 0.03),
                   blurRadius: 10,
                   offset: const Offset(0, -5),
                 ),

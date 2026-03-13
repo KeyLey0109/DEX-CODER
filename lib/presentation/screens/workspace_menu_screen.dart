@@ -138,12 +138,12 @@ class WorkspaceMenuScreen extends StatelessWidget {
                           ),
                           decoration: BoxDecoration(
                             color: selected
-                                ? Colors.blueAccent.withOpacity(0.12)
+                                ? Colors.blueAccent.withValues(alpha: 0.12)
                                 : (isDark ? const Color(0xFF1E2125) : Colors.white),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
                               color: selected
-                                  ? Colors.blueAccent.withOpacity(0.45)
+                                  ? Colors.blueAccent.withValues(alpha: 0.45)
                                   : (isDark ? Colors.white10 : const Color(0xFFE2E8F0)),
                             ),
                           ),

@@ -35,14 +35,16 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> {
   }
 
   String _statusText() {
-    if (widget.friend.isOnline)
+    if (widget.friend.isOnline) {
       return AppPreferences.tr('Đang trực tuyến', 'Online');
+    }
     final lastSeen = widget.friend.lastSeenAt;
     if (lastSeen == null) return AppPreferences.tr('Ngoại tuyến', 'Offline');
 
     final diff = DateTime.now().difference(lastSeen);
-    if (diff.inMinutes < 1)
+    if (diff.inMinutes < 1) {
       return AppPreferences.tr('Vừa hoạt động', 'Just active');
+    }
     if (diff.inMinutes < 60) {
       return AppPreferences.tr(
         'Hoạt động ${diff.inMinutes} phút trước',
@@ -63,8 +65,9 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> {
 
   String _lastSeenDetail() {
     final lastSeen = widget.friend.lastSeenAt;
-    if (lastSeen == null)
+    if (lastSeen == null) {
       return AppPreferences.tr('Chưa có dữ liệu', 'No data');
+    }
 
     final local = lastSeen.toLocal();
     final day = local.day.toString().padLeft(2, '0');
@@ -205,7 +208,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> {
             Center(
               child: CircleAvatar(
                 radius: 46,
-                backgroundColor: Colors.blueAccent.withOpacity(0.15),
+                backgroundColor: Colors.blueAccent.withValues(alpha: 0.15),
                 backgroundImage: widget.friend.avatarUrl != null
                     ? NetworkImage(widget.friend.avatarUrl!)
                     : null,
@@ -421,7 +424,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.blueGrey.withOpacity(0.12)),
+        border: Border.all(color: Colors.blueGrey.withValues(alpha: 0.12)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -457,7 +460,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.blueGrey.withOpacity(0.12)),
+        border: Border.all(color: Colors.blueGrey.withValues(alpha: 0.12)),
       ),
       child: Row(
         children: [

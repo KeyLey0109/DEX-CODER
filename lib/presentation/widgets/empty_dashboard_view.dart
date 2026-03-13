@@ -338,9 +338,12 @@ class _EmptyDashboardViewState extends State<EmptyDashboardView> {
       final uniqueFriends = <String>{};
       for (final item in friendshipsList) {
         final m = item as Map<String, dynamic>;
-        if (m['user_id'] != userId) uniqueFriends.add(m['user_id'] as String);
-        if (m['friend_id'] != userId)
+        if (m['user_id'] != userId) {
+          uniqueFriends.add(m['user_id'] as String);
+        }
+        if (m['friend_id'] != userId) {
           uniqueFriends.add(m['friend_id'] as String);
+        }
       }
 
       if (!mounted) return;
@@ -403,7 +406,7 @@ class _EmptyDashboardViewState extends State<EmptyDashboardView> {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
@@ -413,7 +416,7 @@ class _EmptyDashboardViewState extends State<EmptyDashboardView> {
         children: [
           CircleAvatar(
             radius: 32,
-            backgroundColor: Colors.blueAccent.withOpacity(0.12),
+            backgroundColor: Colors.blueAccent.withValues(alpha: 0.12),
             child: ClipOval(
               child: _avatarUrl != null
                   ? Image.network(
@@ -551,7 +554,7 @@ class _EmptyDashboardViewState extends State<EmptyDashboardView> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.blueGrey.withOpacity(0.12)),
+        border: Border.all(color: Colors.blueGrey.withValues(alpha: 0.12)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -587,7 +590,7 @@ class _EmptyDashboardViewState extends State<EmptyDashboardView> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.blueGrey.withOpacity(0.12)),
+        border: Border.all(color: Colors.blueGrey.withValues(alpha: 0.12)),
       ),
       child: Row(
         children: [

@@ -48,20 +48,20 @@ class TaskCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 10, color: color.withOpacity(0.8)),
+          Icon(icon, size: 10, color: color.withValues(alpha: 0.8)),
           const SizedBox(width: 4),
           Text(
             label.toUpperCase(),
             style: TextStyle(
               fontSize: 9,
               fontWeight: FontWeight.w900,
-              color: color.withOpacity(0.8),
+              color: color.withValues(alpha: 0.8),
               letterSpacing: 0.5,
             ),
           ),
@@ -81,10 +81,10 @@ class TaskCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withOpacity(0.15)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.15)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -150,8 +150,9 @@ class TaskCard extends StatelessWidget {
                         builder: (context, state) {
                           if (state is BoardLoaded) {
                             final role = state.getRole(task.boardId);
-                            if (role == 'viewer')
+                            if (role == 'viewer') {
                               return const SizedBox.shrink();
+                            }
                           }
                           return InkWell(
                             onTap: () => context.read<TaskBloc>().add(
@@ -161,7 +162,7 @@ class TaskCard extends StatelessWidget {
                             child: Container(
                               padding: const EdgeInsets.all(4),
                               decoration: BoxDecoration(
-                                color: Colors.grey.withOpacity(0.05),
+                                color: Colors.grey.withValues(alpha: 0.05),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: const Icon(
@@ -219,13 +220,13 @@ class TaskCard extends StatelessWidget {
                               ),
                               decoration: BoxDecoration(
                                 color: isOverdue
-                                    ? Colors.red.withOpacity(0.12)
+                                    ? Colors.red.withValues(alpha: 0.12)
                                     : const Color(0xFFF1F5F9),
                                 borderRadius: BorderRadius.circular(999),
                                 border: Border.all(
                                   color: isOverdue
-                                      ? Colors.red.withOpacity(0.4)
-                                      : Colors.grey.withOpacity(0.2),
+                                      ? Colors.red.withValues(alpha: 0.4)
+                                      : Colors.grey.withValues(alpha: 0.2),
                                 ),
                               ),
                               child: Text(
@@ -273,13 +274,13 @@ class TaskCard extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: isOverdue
-                              ? Colors.red.withOpacity(0.12)
+                              ? Colors.red.withValues(alpha: 0.12)
                               : const Color(0xFFF1F5F9),
                           borderRadius: BorderRadius.circular(999),
                           border: Border.all(
                             color: isOverdue
-                                ? Colors.red.withOpacity(0.4)
-                                : Colors.grey.withOpacity(0.2),
+                                ? Colors.red.withValues(alpha: 0.4)
+                                : Colors.grey.withValues(alpha: 0.2),
                           ),
                         ),
                         child: Text(

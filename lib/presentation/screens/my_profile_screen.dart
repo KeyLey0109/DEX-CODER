@@ -153,7 +153,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                     children: [
                       CircleAvatar(
                         radius: 42,
-                        backgroundColor: Colors.blueAccent.withOpacity(0.15),
+                        backgroundColor: Colors.blueAccent.withValues(alpha: 0.15),
                         backgroundImage: _avatarUrl != null
                             ? NetworkImage(_avatarUrl!)
                             : null,
@@ -350,7 +350,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.blueGrey.withOpacity(0.12)),
+        border: Border.all(color: Colors.blueGrey.withValues(alpha: 0.12)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -386,7 +386,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.blueGrey.withOpacity(0.12)),
+        border: Border.all(color: Colors.blueGrey.withValues(alpha: 0.12)),
       ),
       child: Row(
         children: [

@@ -81,7 +81,7 @@ class _DrawingDialogState extends State<DrawingDialog> {
         ElevatedButton(
           onPressed: () async {
             final bytes = await _capturePng();
-            if (mounted) Navigator.pop(context, bytes);
+            if (context.mounted) Navigator.pop(context, bytes);
           },
           child: const Text('Lưu bản vẽ'),
         ),

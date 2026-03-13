@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import '../constants/ai_constants.dart';
 
@@ -7,7 +8,7 @@ class AiService {
   AiService() {
     final key = AiConstants.geminiApiKey.trim();
     // ignore: avoid_print
-    print(
+    debugPrint(
       'DEBUG: AiService initialized. Key length: ${key.length}. Masked: ${key.substring(0, 5)}...${key.substring(key.length - 4)}',
     );
     _model = GenerativeModel(model: AiConstants.modelName, apiKey: key);
@@ -46,7 +47,7 @@ Nội dung mô tả cần viết lại:
       final response = await _model.generateContent(content);
       return response.text ?? text;
     } catch (e) {
-      print('AI Service Error (polishText): $e');
+      debugPrint('AI Service Error (polishText): $e');
       return text;
     }
   }
@@ -77,7 +78,7 @@ Mô tả:
           .where((e) => e.isNotEmpty)
           .toList();
     } catch (e) {
-      print('AI Service Error (generateChecklist): $e');
+      debugPrint('AI Service Error (generateChecklist): $e');
       return [];
     }
   }

@@ -77,8 +77,15 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>https</string>
+		<string>http</string>
+	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Ứng dụng cần truy cập máy ảnh để bạn có thể chụp ảnh đính kèm vào công việc.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Ứng dụng cần truy cập thư viện ảnh để bạn có thể lưu tệp hình ảnh đính kèm.</string>
+	<string>Ứng dụng cần truy cập thư viện ảnh để bạn có thể chọn và lưu hình ảnh đính kèm.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Ứng dụng cần quyền thêm ảnh vào thư viện để lưu các tệp đính kèm.</string>
 	<key>UIFileSharingEnabled</key>

@@ -132,13 +132,13 @@ class _BoardMemberSelectDialogState extends State<BoardMemberSelectDialog> {
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
       decoration: BoxDecoration(
         color: isAdmin
-            ? Colors.orange.withOpacity(0.1)
-            : Colors.blueAccent.withOpacity(0.1),
+            ? Colors.orange.withValues(alpha: 0.1)
+            : Colors.blueAccent.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: isAdmin
-              ? Colors.orange.withOpacity(0.5)
-              : Colors.blueAccent.withOpacity(0.5),
+              ? Colors.orange.withValues(alpha: 0.5)
+              : Colors.blueAccent.withValues(alpha: 0.5),
           width: 0.5,
         ),
       ),

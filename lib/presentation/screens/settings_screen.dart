@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -342,7 +341,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 ),
                                 const SizedBox(height: 15),
                                 DropdownButtonFormField<String>(
-                                  value: _languageCode,
+                                  initialValue: _languageCode,
                                   decoration: InputDecoration(
                                     prefixIcon: const Icon(Icons.language),
                                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -409,7 +408,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.withOpacity(0.3)),
+          border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
         ),
         child: Icon(icon, size: 20),
       ),
@@ -421,7 +420,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey.withOpacity(0.2)),
+        side: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -449,7 +448,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       subtitle: Text(subtitle),
       value: value,
       onChanged: onChanged,
-      activeColor: const Color(0xFF2E66FF),
+      activeThumbColor: const Color(0xFF2E66FF),
       contentPadding: EdgeInsets.zero,
     );
   }

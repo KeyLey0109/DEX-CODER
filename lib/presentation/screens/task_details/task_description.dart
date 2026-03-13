@@ -52,8 +52,8 @@ class TaskDescription extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: isEditing
-                    ? Colors.red.withOpacity(0.08)
-                    : accentColor.withOpacity(0.08),
+                    ? Colors.red.withValues(alpha: 0.08)
+                    : accentColor.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
@@ -100,21 +100,21 @@ class TaskDescription extends StatelessWidget {
           decoration: BoxDecoration(
             color: Color.lerp(
               Colors.white,
-              accentColor.withOpacity(0.05),
+              accentColor.withValues(alpha: 0.05),
               value,
             ),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: Color.lerp(
                 Colors.transparent,
-                accentColor.withOpacity(0.2),
+                accentColor.withValues(alpha: 0.2),
                 value,
               )!,
               width: 1,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.03),
+                color: Colors.black.withValues(alpha: 0.03),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -197,10 +197,10 @@ class TaskDescription extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: accentColor.withOpacity(0.2)),
+            border: Border.all(color: accentColor.withValues(alpha: 0.2)),
             boxShadow: [
               BoxShadow(
-                color: accentColor.withOpacity(0.05),
+                color: accentColor.withValues(alpha: 0.05),
                 blurRadius: 20,
               ),
             ],
@@ -307,7 +307,7 @@ class TaskDescription extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: (color ?? Colors.blueGrey).withOpacity(0.08),
+            color: (color ?? Colors.blueGrey).withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(

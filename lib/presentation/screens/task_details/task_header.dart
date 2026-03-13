@@ -38,12 +38,12 @@ class TaskHeader extends StatelessWidget {
             children: [
               TaskDetailsUtils.buildBadge(
                 TaskDetailsUtils.statusLabel(task.status),
-                accentColor.withOpacity(0.12),
+                accentColor.withValues(alpha: 0.12),
                 accentColor,
               ),
               TaskDetailsUtils.buildBadge(
                 TaskDetailsUtils.formatDate(task.createdAt),
-                Colors.grey.withOpacity(0.08),
+                Colors.grey.withValues(alpha: 0.08),
                 const Color(0xFF64748B),
               ),
               if (task.dueAt != null)
@@ -52,7 +52,7 @@ class TaskHeader extends StatelessWidget {
                     'Hạn: ${TaskDetailsUtils.formatDueAt(task.dueAt!.toLocal())}',
                     'Due: ${TaskDetailsUtils.formatDueAt(task.dueAt!.toLocal())}',
                   ),
-                  Colors.orange.withOpacity(0.12),
+                  Colors.orange.withValues(alpha: 0.12),
                   Colors.orange[800]!,
                 ),
             ],

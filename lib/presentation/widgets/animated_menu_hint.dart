@@ -59,9 +59,9 @@ class _AnimatedMenuHintState extends State<AnimatedMenuHint>
                 margin: const EdgeInsets.only(left: 12),
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.blueAccent.withOpacity(0.15),
+                  color: Colors.blueAccent.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
+                  border: Border.all(color: Colors.blueAccent.withValues(alpha: 0.3)),
                 ),
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,

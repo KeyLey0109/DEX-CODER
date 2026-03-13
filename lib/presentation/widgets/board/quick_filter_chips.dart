@@ -37,7 +37,7 @@ class QuickFilterChips extends StatelessWidget {
       label: Text(label),
       selected: selected,
       onSelected: (_) => onFilterChanged(value),
-      selectedColor: Colors.blueAccent.withOpacity(0.16),
+      selectedColor: Colors.blueAccent.withValues(alpha: 0.16),
       labelStyle: TextStyle(
         color: selected ? Colors.blueAccent : Colors.black87,
         fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
