@@ -1,27 +1,27 @@
-import Flutter
 import UIKit
+import Flutter
+import flutter_local_notifications // Bắt buộc phải import dòng này
 
 @main
-@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
-  
+@objc class AppDelegate: FlutterAppDelegate {
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     
-    // Đảm bảo delegate cho thông báo hoạt động chính xác
-    if #available(iOS 10.0, *) {
-      UNUserNotificationCenter.current().delegate = self
+    // 1. Đăng ký callback cho plugin thông báo (Bắt buộc để tránh crash khi app chạy ngầm)
+    FlutterLocalNotificationsPlugin.setPluginRegistrantCallback { (registry) in
+        GeneratedPluginRegistrant.register(with: registry)
     }
     
-    // Đăng ký các plugin (bao gồm local notifications)
+    // 2. Cấp quyền hiển thị thông báo popup khi app đang mở trên màn hình (Foreground)
+    if #available(iOS 10.0, *) {
+      UNUserNotificationCenter.current().delegate = self as UNUserNotificationCenterDelegate
+    }
+
+    // 3. Đăng ký toàn bộ các plugin còn lại của Flutter
     GeneratedPluginRegistrant.register(with: self)
     
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
-  }
-
-  // Hỗ trợ cho các engine chạy ngầm (nếu có dùng background tasks)
-  func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
-    GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
   }
 }
