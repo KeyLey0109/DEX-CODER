@@ -17,6 +17,8 @@ class WorkspaceMenuScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -34,6 +36,13 @@ class WorkspaceMenuScreen extends StatelessWidget {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: () => _showAddBoardDialog(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2E66FF),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                       icon: const Icon(Icons.add_rounded),
                       label: Text(
                         AppPreferences.tr('Tạo bảng mới', 'Create new board'),
@@ -48,15 +57,17 @@ class WorkspaceMenuScreen extends StatelessWidget {
               child: InkWell(
                 borderRadius: BorderRadius.circular(16),
                 onTap: () {
-                  Navigator.pop(context); // Close menu
+                  Navigator.pop(context); // Đóng menu
                   Navigator.pushNamed(context, '/my-tasks');
                 },
                 child: Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: isDark ? const Color(0xFF1E2125) : Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                    border: Border.all(
+                      color: isDark ? Colors.white12 : const Color(0xFFE2E8F0),
+                    ),
                   ),
                   child: Row(
                     children: [
@@ -65,10 +76,10 @@ class WorkspaceMenuScreen extends StatelessWidget {
                       Expanded(
                         child: Text(
                           AppPreferences.tr('Công việc của tôi', 'My Tasks'),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 15,
-                            color: Color(0xFF0F172A),
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
                           ),
                         ),
                       ),
@@ -83,7 +94,7 @@ class WorkspaceMenuScreen extends StatelessWidget {
               child: BlocBuilder<BoardBloc, BoardState>(
                 builder: (context, state) {
                   if (state is BoardLoading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator.adaptive());
                   }
                   if (state is BoardError) {
                     return Center(
@@ -101,8 +112,8 @@ class WorkspaceMenuScreen extends StatelessWidget {
                     return Center(
                       child: Text(
                         AppPreferences.tr(
-                          'Chưa có bảng nào. Tạo bảng mới để bắt đầu.',
-                          'No boards yet. Create a new one to start.',
+                          'Chưa có bảng nào.',
+                          'No boards yet.',
                         ),
                         style: const TextStyle(color: Color(0xFF64748B)),
                       ),
@@ -112,7 +123,8 @@ class WorkspaceMenuScreen extends StatelessWidget {
                   return ListView.separated(
                     padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
                     itemCount: boards.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 10),
+                    // SỬA LỖI TẠI ĐÂY: Đổi (_, _) thành (context, index)
+                    separatorBuilder: (context, index) => const SizedBox(height: 10),
                     itemBuilder: (context, index) {
                       final board = boards[index];
                       final selected = board.id == selectedBoardId;
@@ -127,12 +139,12 @@ class WorkspaceMenuScreen extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: selected
                                 ? Colors.blueAccent.withOpacity(0.12)
-                                : Colors.white,
+                                : (isDark ? const Color(0xFF1E2125) : Colors.white),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
                               color: selected
                                   ? Colors.blueAccent.withOpacity(0.45)
-                                  : const Color(0xFFE2E8F0),
+                                  : (isDark ? Colors.white10 : const Color(0xFFE2E8F0)),
                             ),
                           ),
                           child: Row(
@@ -141,18 +153,15 @@ class WorkspaceMenuScreen extends StatelessWidget {
                                 child: Text(
                                   board.title,
                                   style: TextStyle(
-                                    fontWeight: selected
-                                        ? FontWeight.w700
-                                        : FontWeight.w600,
+                                    fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
                                     fontSize: 15,
-                                    color: const Color(0xFF0F172A),
+                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
                                   ),
                                 ),
                               ),
                               IconButton(
                                 tooltip: AppPreferences.tr('Xóa', 'Delete'),
-                                onPressed: () =>
-                                    _showDeleteBoardDialog(context, board),
+                                onPressed: () => _showDeleteBoardDialog(context, board),
                                 icon: const Icon(
                                   Icons.delete_outline_rounded,
                                   color: Colors.redAccent,
@@ -180,88 +189,21 @@ class WorkspaceMenuScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: accentColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(Icons.dashboard_customize_rounded,
-                  color: accentColor, size: 24),
-            ),
-            const SizedBox(width: 16),
-            Text(
-              AppPreferences.tr('Tạo bảng mới', 'Create board'),
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF1E293B),
-              ),
-            ),
-          ],
+        title: Text(AppPreferences.tr('Tạo bảng mới', 'Create board')),
+        content: TextField(
+          controller: titleController,
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: AppPreferences.tr('Nhập tên bảng...', 'Enter title...'),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          ),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 20),
-            Text(
-              AppPreferences.tr('Tên bảng', 'Board Title'),
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: Colors.grey.shade600,
-                letterSpacing: 0.5,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: titleController,
-              autofocus: true,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF0F172A),
-              ),
-              decoration: InputDecoration(
-                hintText: AppPreferences.tr('Nhập tên bảng...', 'Enter title...'),
-                hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 15),
-                filled: true,
-                fillColor: const Color(0xFFF8FAFC),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: Colors.grey.shade200),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: accentColor, width: 2),
-                ),
-              ),
-            ),
-          ],
-        ),
-        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.grey.shade600,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            ),
-            child: Text(
-              AppPreferences.tr('Hủy', 'Cancel'),
-              style: const TextStyle(fontWeight: FontWeight.w700),
-            ),
+            child: Text(AppPreferences.tr('Hủy', 'Cancel')),
           ),
-          const SizedBox(width: 8),
           ElevatedButton(
             onPressed: () {
               final title = titleController.text.trim();
@@ -280,19 +222,8 @@ class WorkspaceMenuScreen extends StatelessWidget {
                   );
               Navigator.pop(context);
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: accentColor,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
-            child: Text(
-              AppPreferences.tr('Tạo bảng', 'Create'),
-              style: const TextStyle(fontWeight: FontWeight.w800),
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: accentColor, foregroundColor: Colors.white),
+            child: Text(AppPreferences.tr('Tạo', 'Create')),
           ),
         ],
       ),
@@ -303,59 +234,25 @@ class WorkspaceMenuScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text(
-          AppPreferences.tr('Xác nhận xóa', 'Confirm delete'),
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFF1E293B),
-          ),
-        ),
+        title: Text(AppPreferences.tr('Xác nhận xóa', 'Confirm delete')),
         content: Text(
           AppPreferences.tr(
             'Bạn có chắc muốn xóa bảng "${board.title}"?',
             'Are you sure you want to delete board "${board.title}"?',
           ),
-          style: const TextStyle(
-            fontSize: 15,
-            color: Color(0xFF475569),
-            height: 1.5,
-          ),
         ),
-        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.grey.shade600,
-            ),
-            child: Text(
-              AppPreferences.tr('Hủy', 'Cancel'),
-              style: const TextStyle(fontWeight: FontWeight.w700),
-            ),
+            child: Text(AppPreferences.tr('Hủy', 'Cancel')),
           ),
-          const SizedBox(width: 8),
           ElevatedButton(
             onPressed: () {
               context.read<BoardBloc>().add(DeleteBoardEvent(board.id));
               Navigator.pop(context);
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
-            child: Text(
-              AppPreferences.tr('Xóa', 'Delete'),
-              style: const TextStyle(fontWeight: FontWeight.w800),
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white),
+            child: Text(AppPreferences.tr('Xóa', 'Delete')),
           ),
         ],
       ),

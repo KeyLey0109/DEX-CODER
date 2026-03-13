@@ -33,22 +33,22 @@ import 'presentation/screens/my_tasks_screen.dart';
 import 'data/repositories/friend_repository.dart';
 
 Future<void> main() async {
-  // 1. Khởi tạo binding của Flutter đầu tiên
+  // 1. Đảm bảo Flutter được khởi tạo
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 2. Cấu hình định hướng dọc cho iOS/Android
+  // 2. Ép màn hình luôn dọc (Tránh lỗi giao diện trên iPhone)
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
 
   try {
-    // 3. Khởi tạo Supabase với Timeout để tránh treo màn hình trắng
+    // 3. Khởi tạo Supabase với cơ chế Timeout
     await supabase.Supabase.initialize(
       url: SupabaseConstants.supabaseUrl,
       anonKey: SupabaseConstants.supabaseAnonKey,
     ).timeout(const Duration(seconds: 10));
 
-    // 4. Khởi tạo Database cho Desktop
+    // 4. Khởi tạo DB cho Desktop (nếu có)
     if (!kIsWeb &&
         (defaultTargetPlatform == TargetPlatform.windows ||
             defaultTargetPlatform == TargetPlatform.linux ||
@@ -57,10 +57,9 @@ Future<void> main() async {
       databaseFactory = databaseFactoryFfi;
     }
 
-    // 5. Khởi tạo Dependency Injection & Services
+    // 5. Khởi tạo Service Locator & Thông báo
     await di.init();
     await NotificationService.init();
-
   } catch (e) {
     debugPrint('Critical Initialization Error: $e');
   }
@@ -91,9 +90,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     
-    // Khởi tạo repository từ service locator
+    // Khởi tạo Repo từ GetIt
     _friendRepository = di.sl<FriendRepository>();
 
+    // Lắng nghe thay đổi đăng nhập từ Supabase
     _authSubscription = supabase.Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       _handleAuthStateChange(data);
     });
@@ -102,15 +102,19 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     _startPresenceHeartbeat();
   }
 
-  void _handleAuthStateChange(supabase.AuthState data) async {
+  // Sử dụng dynamic để tránh xung đột kiểu dữ liệu AuthState của Bloc và Supabase
+  void _handleAuthStateChange(dynamic data) async {
     unawaited(_syncAppPreferences());
     
-    if (data.event == supabase.AuthChangeEvent.passwordRecovery && !_openingRecoveryScreen) {
-      _openingRecoveryScreen = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        await _navigatorKey.currentState?.pushNamed('/reset-password');
-        _openingRecoveryScreen = false;
-      });
+    // Kiểm tra logic quên mật khẩu
+    if (data is supabase.AuthState) {
+      if (data.event == supabase.AuthChangeEvent.passwordRecovery && !_openingRecoveryScreen) {
+        _openingRecoveryScreen = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          await _navigatorKey.currentState?.pushNamed('/reset-password');
+          _openingRecoveryScreen = false;
+        });
+      }
     }
   }
 
@@ -169,6 +173,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     }
   }
 
+  // --- Theme ---
   static final _lightTheme = ThemeData(
     colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.light),
     useMaterial3: true,
@@ -208,6 +213,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             SupabaseNotificationListener.start(state.user.id);
             context.read<BoardBloc>().add(WatchBoards());
             context.read<TaskBloc>().add(LoadTasks());
+            
+            // Xóa stack và về trang chủ khi login
             _navigatorKey.currentState?.pushNamedAndRemoveUntil('/', (route) => false);
           } else if (state is Unauthenticated) {
             SupabaseNotificationListener.stop();
@@ -240,7 +247,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 '/my-tasks': (_) => const MyTasksScreen(),
               },
               onGenerateRoute: (settings) {
-                if (settings.name?.startsWith('/task/') ?? false) {
+                if (settings.name != null && settings.name!.startsWith('/task/')) {
                   final taskId = settings.name!.replaceFirst('/task/', '');
                   return MaterialPageRoute(
                     builder: (context) => WebTaskViewScreen(taskId: taskId),
