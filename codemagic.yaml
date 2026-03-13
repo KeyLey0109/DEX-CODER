@@ -29,7 +29,7 @@ workflows:
           sed -i '' "s/com.nhom4.taskmate/${BUNDLE_ID}/g" ios/Runner.xcodeproj/project.pbxproj
       - name: Prepare Flutter iOS configs
         script: |
-          flutter build ios --release --config-only
+          flutter build ios --release --config-only --no-codesign
       - name: Build unsigned Runner.app
         script: |
           xcodebuild \
@@ -47,7 +47,7 @@ workflows:
         script: |
           rm -rf Payload
           mkdir -p Payload
-          cp -R build/ios_unsigned/Build/Products/Release-iphoneos/Runner.app Payload/Runner.app
+          cp -R build/ios_unsigned/Build/Products/Release-iphoneos/Runner.app Payload/
           mkdir -p build/ios/ipa
           zip -r build/ios/ipa/TaskMate-unsigned.ipa Payload
     artifacts:
