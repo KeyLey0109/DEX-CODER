@@ -1,8 +1,10 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart'
-    show databaseFactoryFfi, sqfliteFfiInit;
+import 'package:sqflite_common_ffi/sqflite_ffi.dart' show databaseFactoryFfi, sqfliteFfiInit;
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
 import '../models/board_model.dart';
@@ -39,37 +41,46 @@ class LocalDatabase {
   }
 
   Future<Database> _initDB(String filePath) async {
+    // 1. Xử lý cho môi trường Web
     if (kIsWeb) {
       databaseFactory = databaseFactoryFfiWeb;
       return databaseFactory.openDatabase(
         filePath,
         options: OpenDatabaseOptions(
-          version: 3,
+          version: 8,
           onCreate: _createDB,
           onUpgrade: _onUpgrade,
         ),
       );
     }
 
+    // 2. Xử lý cho Desktop (Windows, Linux, MacOS)
     if (defaultTargetPlatform == TargetPlatform.windows ||
-        defaultTargetPlatform == TargetPlatform.linux ||
-        defaultTargetPlatform == TargetPlatform.macOS) {
+        defaultTargetPlatform == TargetPlatform.linux) {
       sqfliteFfiInit();
       databaseFactory = databaseFactoryFfi;
     }
 
+    // 3. Xử lý đường dẫn cho Mobile (iOS, Android)
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
 
     return openDatabase(
       path,
       version: 8,
+      onConfigure: _onConfigure,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
   }
 
+  // Bật ràng buộc khóa ngoại (Foreign Keys) để ON DELETE CASCADE hoạt động
+  Future<void> _onConfigure(Database db) async {
+    await db.execute('PRAGMA foreign_keys = ON');
+  }
+
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    // Logic nâng cấp DB không làm mất dữ liệu người dùng
     if (oldVersion < 2) {
       await db.execute('DROP TABLE IF EXISTS pending_ops');
       await db.execute('DROP TABLE IF EXISTS tasks');
@@ -77,38 +88,22 @@ class LocalDatabase {
       await _createDB(db, 2);
     }
     if (oldVersion < 3) {
-      try {
-        await db.execute('ALTER TABLE tasks ADD COLUMN due_at TEXT');
-      } catch (_) {}
+      try { await db.execute('ALTER TABLE tasks ADD COLUMN due_at TEXT'); } catch (_) {}
     }
     if (oldVersion < 4) {
-      try {
-        await db.execute('ALTER TABLE tasks ADD COLUMN checklist TEXT');
-      } catch (_) {}
+      try { await db.execute('ALTER TABLE tasks ADD COLUMN checklist TEXT'); } catch (_) {}
     }
     if (oldVersion < 5) {
-      try {
-        await db.execute(
-          'ALTER TABLE tasks ADD COLUMN has_attachments INTEGER DEFAULT 0',
-        );
-      } catch (_) {}
+      try { await db.execute('ALTER TABLE tasks ADD COLUMN has_attachments INTEGER DEFAULT 0'); } catch (_) {}
     }
     if (oldVersion < 6) {
-      try {
-        await db.execute(
-          'ALTER TABLE tasks ADD COLUMN task_type TEXT DEFAULT "text"',
-        );
-      } catch (_) {}
+      try { await db.execute('ALTER TABLE tasks ADD COLUMN task_type TEXT DEFAULT "text"'); } catch (_) {}
     }
     if (oldVersion < 7) {
-      try {
-        await db.execute('ALTER TABLE tasks ADD COLUMN assignee_ids TEXT');
-      } catch (_) {}
+      try { await db.execute('ALTER TABLE tasks ADD COLUMN assignee_ids TEXT'); } catch (_) {}
     }
     if (oldVersion < 8) {
-      try {
-        await db.execute('ALTER TABLE tasks ADD COLUMN updated_at TEXT');
-      } catch (_) {}
+      try { await db.execute('ALTER TABLE tasks ADD COLUMN updated_at TEXT'); } catch (_) {}
     }
   }
 
@@ -153,12 +148,12 @@ class LocalDatabase {
     ''');
   }
 
+  // --- QUẢN LÝ BOARDS ---
+
   Future<List<BoardModel>> getBoards() async {
     final db = await database;
     final result = await db.query('boards', orderBy: 'created_at DESC');
-    return result
-        .map((row) => BoardModel.fromMap(Map<String, dynamic>.from(row)))
-        .toList();
+    return result.map((row) => BoardModel.fromMap(row)).toList();
   }
 
   Future<void> replaceBoards(List<BoardModel> boards) async {
@@ -166,22 +161,14 @@ class LocalDatabase {
     await db.transaction((txn) async {
       await txn.delete('boards');
       for (final board in boards) {
-        await txn.insert(
-          'boards',
-          board.toMap(),
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
+        await txn.insert('boards', board.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
       }
     });
   }
 
   Future<int> upsertBoard(BoardModel board) async {
     final db = await database;
-    return db.insert(
-      'boards',
-      board.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    return db.insert('boards', board.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<int> deleteBoard(String id) async {
@@ -189,13 +176,10 @@ class LocalDatabase {
     return db.delete('boards', where: 'id = ?', whereArgs: [id]);
   }
 
-  Future<List<TaskModel>> getTasks({
-    String? boardId,
-    String? query,
-    String? status,
-  }) async {
-    final db = await database;
+  // --- QUẢN LÝ TASKS ---
 
+  Future<List<TaskModel>> getTasks({String? boardId, String? query, String? status}) async {
+    final db = await database;
     final whereClauses = <String>[];
     final whereArgs = <Object?>[];
 
@@ -218,35 +202,22 @@ class LocalDatabase {
       whereArgs: whereArgs.isEmpty ? null : whereArgs,
       orderBy: 'created_at DESC',
     );
-    return result
-        .map((row) => TaskModel.fromMap(Map<String, dynamic>.from(row)))
-        .toList();
+    return result.map((row) => TaskModel.fromMap(row)).toList();
   }
 
-  Future<void> replaceTasksForBoard(
-    String boardId,
-    List<TaskModel> tasks,
-  ) async {
+  Future<void> replaceTasksForBoard(String boardId, List<TaskModel> tasks) async {
     final db = await database;
     await db.transaction((txn) async {
       await txn.delete('tasks', where: 'board_id = ?', whereArgs: [boardId]);
       for (final task in tasks) {
-        await txn.insert(
-          'tasks',
-          task.toMap(),
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
+        await txn.insert('tasks', task.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
       }
     });
   }
 
   Future<int> upsertTask(TaskModel task) async {
     final db = await database;
-    return db.insert(
-      'tasks',
-      task.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    return db.insert('tasks', task.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<int> deleteTask(String id) async {
@@ -258,8 +229,10 @@ class LocalDatabase {
     final db = await database;
     final result = await db.query('tasks', where: 'id = ?', whereArgs: [id]);
     if (result.isEmpty) return null;
-    return TaskModel.fromMap(Map<String, dynamic>.from(result.first));
+    return TaskModel.fromMap(result.first);
   }
+
+  // --- QUẢN LÝ PENDING OPERATIONS (Cho chế độ Offline) ---
 
   Future<int> enqueueOperation({
     required String entity,
@@ -283,16 +256,12 @@ class LocalDatabase {
       whereArgs: [entity],
       orderBy: 'id ASC',
     );
-    return rows
-        .map(
-          (row) => PendingOperation(
-            id: row['id'] as int,
-            entity: row['entity'] as String,
-            operation: row['operation'] as String,
-            payload: row['payload'] as String,
-          ),
-        )
-        .toList();
+    return rows.map((row) => PendingOperation(
+      id: row['id'] as int,
+      entity: row['entity'] as String,
+      operation: row['operation'] as String,
+      payload: row['payload'] as String,
+    )).toList();
   }
 
   Future<int> removePendingOperation(int id) async {
