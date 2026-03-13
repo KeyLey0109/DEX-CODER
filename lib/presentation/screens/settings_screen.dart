@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -94,7 +95,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _languageCode = settings.languageCode;
       });
     } catch (_) {
-      // Bỏ qua lỗi load nếu có
+      // Ignore load errors
     } finally {
       if (mounted) {
         setState(() => _loading = false);
@@ -262,7 +263,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     CircleAvatar(
                                       radius: 35,
                                       backgroundColor: const Color(0xFFDFE9FF),
-                                      // SỬA LỖI ÉP KIỂU TẠI ĐÂY:
                                       backgroundImage: _pendingAvatarBytes != null
                                           ? MemoryImage(_pendingAvatarBytes!) as ImageProvider
                                           : (_avatarUrl != null
@@ -478,7 +478,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 }
 
-// Helper class đơn giản để kiểm tra platform (nếu không dùng thư viện kIsWeb/Platform)
+// Helper class đơn giản để kiểm tra platform
 class RoundedRectanglePlatform {
   static bool get isIOS => defaultTargetPlatform == TargetPlatform.iOS;
 }
